@@ -1,0 +1,27 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - latest
+
+jobs:
+  publish:
+    name: Publish the package to the NPM registry
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install
+        run: make install
+
+      - name: Build
+        run: make build
+
+      - name: Token
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.AUTH_TOKEN }}" > .npmrc
+
+      - name: Publish
+        run: 'make publish || true'
