@@ -14,6 +14,12 @@ Archlinux mirrors generator
 $ npx @aminnairi/archmirrors help
 ```
 
+## Example
+
+```console
+$ npx @aminnairi/archmirrors country france sortby delay output mirrorlist.pacnew
+```
+
 ## Changelog
 
 See [`CHANGELOG.md`](./CHANGELOG.md).

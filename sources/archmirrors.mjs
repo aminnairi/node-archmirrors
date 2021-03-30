@@ -62,6 +62,12 @@ const parse = createNaturalOptionParser([
     option: "active",
     isBoolean: true,
     isMultiple: false
+  },
+  {
+    name: "limit",
+    option: "limit",
+    isBoolean: false,
+    isMultiple: false
   }
 ]);
 
@@ -99,6 +105,9 @@ if (parsed.help === true) {
   console.log("  ipv6");
   console.log("    filter by ipv6 availablility");
   console.log("");
+  console.log("  limit SIZE");
+  console.log("    limit the output servers generated (must be an integer)");
+  console.log("");
   console.log("  output FILENAME");
   console.log("    output the result to a file (default to the standard output)");
   console.log("");
@@ -119,6 +128,11 @@ if (unknown.length > 0) {
 if (lone.length > 0) {
   console.log(`Lone argument: ${lone[0]}`);
   process.exit(2);
+}
+
+if (parsed.limit !== undefined && !Number.isInteger(Number(parsed.limit))) {
+  console.log(`Limit must be an integer, ${JSON.stringify(parsed.limit)} provided`);
+  process.exit(3)
 }
 
 const numberOr = (fallback, something) => {
@@ -151,7 +165,8 @@ const main = async () => {
   const serversSorted = serversByActiveness.sort((firstServer, secondServer) => (parsed.sorts ?? []).reduce((score, sort) => score + numberOr(Infinity, firstServer[sort]) - numberOr(Infinity, secondServer[sort]), 0));
   const urls = serversSorted.map(server => server.url);
   const mirrorlist = urls.map(url => `Server = ${url}$repo/os/$arch`);
-  const output = mirrorlist.join("\n");
+  const limitedMirrorlist = parsed.limit !== undefined ? mirrorlist.slice(0, parsed.limit) : mirrorlist;
+  const output = limitedMirrorlist.join("\n");
 
   if (parsed.output === undefined) {
     console.log(output);
@@ -169,5 +184,5 @@ const main = async () => {
 
 main().catch(error => {
   console.error(error.message);
-  process.exit(3);
+  process.exit(4);
 });
